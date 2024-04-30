@@ -1,0 +1,30 @@
+{
+	"name": "Operations - Terraform",
+	"workspaceFolder": "/workspaces/ado-repo",
+	"features": {
+	     "ghcr.io/devcontainers/features/azure-cli:1": {},
+	     "ghcr.io/devcontainers-contrib/features/terraform-asdf:2": {},
+	     "ghcr.io/microsoft/codespace-features/external-repository:latest": {
+	        "cloneUrl": "https://hackaton-ops@dev.azure.com/hackaton-ops/hackaton-ops/_git/hackaton-ops",
+	        "folder": "/workspaces/ado-repo"
+	     }
+	},
+	"customizations": {
+	   "vscode": {
+	      "settings": {
+		      "adoCodespacesAuth.tenantID": "cd679904-89ab-4c67-ad11-5cead507f70f",
+		      "extensions.showRecommendationsOnlyOnDemand": true,
+		      "extensions.ignoreRecommendations": true
+	      },
+	      "extensions": [
+		      "GitHub.copilot",
+		      "GitHub.copilot-chat",
+		      "hashicorp.terraform",
+          	      "ms-azuretools.vscode-azureterraform",
+		      "ms-vscode.vscode-node-azure-pack"
+	      ]
+	    }
+	},
+	"initializeCommand": "mkdir -p ${localWorkspaceFolder}/../ado-repo",
+	"postStartCommand": "external-git clone && external-git config"
+}

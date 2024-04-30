@@ -1,0 +1,80 @@
+pool:
+  vmImage: ubuntu-latest
+
+trigger: none
+
+variables:
+  terraformVersion: '1.6.5'
+  azureServiceConnection: ServiceConnectionAzureHackathon
+  backendStorageAccount: sahackterraformstate
+  backendResourceGroup: rg-hackathon-ops
+  backendContainer: tfstate
+  backendstate: infrastructurre.tfstate
+
+   
+stages:
+- stage: Development
+  displayName: 'Terraform: Development'
+  condition: succeeded()
+  jobs:
+  - deployment: Plan
+    displayName: Plan
+    timeoutInMinutes: 20
+    environment: 'WhatIf'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: TerraformInstaller@0
+            inputs:
+              terraformVersion: $(terraformVersion)
+          - task:  TerraformTaskV4@4
+            displayName: terraform init
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
+              backendServiceArm: $(azureServiceConnection)
+              backendAzureRmResourceGroupName: $(backendResourceGroup)
+              backendAzureRmStorageAccountName: $(backendStorageAccount)
+              backendAzureRmContainerName: $(backendContainer)
+              backendAzureRmKey: $(backendstate)
+          - task:  TerraformTaskV4@4
+            displayName: terraform plan
+            inputs:
+              provider: 'azurerm'
+              command: 'plan'
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
+              environmentServiceNameAzureRM: $(azureServiceConnection)
+  - deployment: Apply
+    displayName: Apply
+    dependsOn: Plan
+    timeoutInMinutes: 180
+    environment: Development
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: TerraformInstaller@0
+            inputs:
+              terraformVersion: $(terraformVersion)
+          - task:  TerraformTaskV4@4
+            displayName: terraform init
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
+              backendServiceArm: $(azureServiceConnection)
+              backendAzureRmResourceGroupName: $(backendResourceGroup)
+              backendAzureRmStorageAccountName: $(backendStorageAccount)
+              backendAzureRmContainerName: $(backendContainer)
+              backendAzureRmKey: $(backendstate)
+          - task:  TerraformTaskV4@4
+            displayName: terraform apply
+            inputs:
+              provider: 'azurerm'
+              command: 'apply'
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
+              environmentServiceNameAzureRM: $(azureServiceConnection)
